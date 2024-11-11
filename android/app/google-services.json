@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "397894803698",
+    "project_id": "liveasy-task-2c0d6",
+    "storage_bucket": "liveasy-task-2c0d6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:397894803698:android:aa355c53caeceb6d90f06b",
+        "android_client_info": {
+          "package_name": "com.example.liveasy"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDcz-9M3u0tS-OdD1Cnj0btSGZa4dYTTwE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

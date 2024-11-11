@@ -1,6 +1,9 @@
 import 'package:country_code_picker/country_code_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:liveasy/screens/otp_verification.dart';
+import 'package:liveasy/screens/profile_select.dart';
 import 'package:liveasy/utils/utilities.dart';
 
 class PhoneLogin extends StatefulWidget {
@@ -12,7 +15,46 @@ class PhoneLogin extends StatefulWidget {
 
 class _PhoneLoginState extends State<PhoneLogin> {
   final TextEditingController number = TextEditingController();
+
   CountryCode selectedCountryCode = CountryCode.fromCountryCode('IN');
+
+  sendCode(phoneNum, context) async {
+    try {
+      await FirebaseAuth.instance.verifyPhoneNumber(
+          phoneNumber: phoneNum.toString(),
+          verificationCompleted: (PhoneAuthCredential credential) {
+            Navigator.of(context)
+                .pushReplacement(MaterialPageRoute(builder: (context) {
+              return const ProfileSelect();
+            }));
+          },
+          verificationFailed: (FirebaseAuthException e) {
+            ScaffoldMessenger.of(context)
+                .showSnackBar(SnackBar(content: Text(e.toString())));
+          },
+          codeSent: (String vid, int? token) {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) {
+                  return OtpVerification(
+                    vid: vid,
+                    token: token,
+                    phoneNumber: phoneNum.toString(),
+                  );
+                },
+              ),
+            );
+          },
+          codeAutoRetrievalTimeout: (vid) {
+            ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Auto-retrieval Timed-out')));
+          });
+    } catch (e) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('11' + e.toString())));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -83,6 +125,7 @@ class _PhoneLoginState extends State<PhoneLogin> {
                   if (number.text.toString().length == 10) {
                     final numWithCode =
                         selectedCountryCode.toString() + number.text.toString();
+                    sendCode(numWithCode, context);
                   } else if (number.text.toString().isEmpty) {
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(

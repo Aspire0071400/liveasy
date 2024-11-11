@@ -1,9 +1,21 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:liveasy/main.dart';
+import 'package:liveasy/screens/profile_select.dart';
 import 'package:liveasy/utils/utilities.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
 class OtpVerification extends StatefulWidget {
-  const OtpVerification({super.key});
+  const OtpVerification({
+    super.key,
+    required this.vid,
+    required this.phoneNumber,
+    this.token,
+  });
+
+  final String vid;
+  final int? token;
+  final String phoneNumber;
 
   @override
   State<OtpVerification> createState() => _OtpVerificationState();
@@ -11,6 +23,32 @@ class OtpVerification extends StatefulWidget {
 
 class _OtpVerificationState extends State<OtpVerification> {
   final otpController = TextEditingController();
+  var code = '';
+
+  signIn(context) async {
+    PhoneAuthCredential credential = PhoneAuthProvider.credential(
+      verificationId: widget.vid,
+      smsCode: code,
+    );
+
+    try {
+      await FirebaseAuth.instance
+          .signInWithCredential(credential)
+          .then((value) {
+        Navigator.of(context)
+            .pushReplacement(MaterialPageRoute(builder: (context) {
+          return const MyApp(); // or ProfilePage
+        }));
+      });
+    } on FirebaseAuthException catch (e) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.toString())));
+    } catch (e) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.toString())));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,6 +76,12 @@ class _OtpVerificationState extends State<OtpVerification> {
               child: PinCodeTextField(
                 keyboardType: TextInputType.number,
                 appContext: context,
+                onChanged: (value) {
+                  setState(() {
+                    code = value;
+                  });
+                },
+                onCompleted: signIn(context),
                 length: 6,
                 controller: otpController,
                 enableActiveFill: true,
@@ -78,6 +122,7 @@ class _OtpVerificationState extends State<OtpVerification> {
               child: FilledButton(
                 onPressed: () {
                   if (otpController.text.toString().length == 6) {
+                    //signIn(context);
                   } else if (otpController.text.toString().length != 6) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
@@ -91,11 +136,6 @@ class _OtpVerificationState extends State<OtpVerification> {
                       ),
                     );
                   }
-
-                  //  Navigator.of(context)
-                  //     .push(MaterialPageRoute(builder: (context) {
-                  //   return const PhoneLogin();
-                  // }));
                 },
                 style: const ButtonStyle(
                     shape: WidgetStatePropertyAll(RoundedRectangleBorder()),
